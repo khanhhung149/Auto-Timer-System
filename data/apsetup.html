@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auto Timer - WiFi</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img class="logo-img" src="logo.png" alt="EETIUM" />
+      <div>
+        <h1>Auto Timer</h1>
+        <small data-i18n="sub">Cài đặt WiFi lần đầu</small>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2 data-i18n="title">Chọn mạng WiFi</h2>
+      <p class="muted" data-i18n="desc">Chọn WiFi nhà để thiết bị kết nối Internet.</p>
+
+      <button class="btn" id="scanBtn" onclick="scan()" data-i18n="rescan">Quét lại</button>
+      <div id="list" class="wifi-list"></div>
+
+      <div id="passBox" style="display:none">
+        <label data-i18n="picked">Mạng đã chọn
+          <input type="text" id="ssidShow" readonly />
+        </label>
+        <label data-i18n="pass">Mật khẩu
+          <input type="password" id="pass" autocomplete="off" />
+        </label>
+        <button class="btn primary" id="saveBtn" onclick="save()" data-i18n="save">Lưu &amp; kết nối</button>
+        <button class="btn" onclick="back()" data-i18n="back">Quay lại</button>
+      </div>
+
+      <div id="done" style="display:none">
+        <h2 data-i18n="done_t">✅ Đã lưu</h2>
+        <p data-i18n="done_1">Thiết bị đang khởi động lại và kết nối WiFi...</p>
+        <p class="muted" data-i18n="done_2">Hãy chuyển điện thoại về WiFi nhà rồi truy cập
+          <b>http://autotimer.local</b> (hoặc IP hiển thị trên màn hình thiết bị).</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const I18N = {
+      vi: { sub:"Cài đặt WiFi lần đầu", title:"Chọn mạng WiFi", desc:"Chọn WiFi nhà để thiết bị kết nối Internet.",
+            rescan:"Quét lại", picked:"Mạng đã chọn", pass:"Mật khẩu", save:"Lưu & kết nối", back:"Quay lại",
+            done_t:"✅ Đã lưu", done_1:"Thiết bị đang khởi động lại và kết nối WiFi...",
+            scanning:"Đang quét...", scanErr:"Lỗi quét", noNet:"Không thấy mạng nào", saving:"Đang lưu..." },
+      en: { sub:"First-time WiFi setup", title:"Choose WiFi network", desc:"Pick your home WiFi so the device can reach the Internet.",
+            rescan:"Rescan", picked:"Selected network", pass:"Password", save:"Save & connect", back:"Back",
+            done_t:"✅ Saved", done_1:"Device is restarting and connecting to WiFi...",
+            scanning:"Scanning...", scanErr:"Scan error", noNet:"No networks found", saving:"Saving..." }
+    };
+    let L = I18N.vi, picked = null;
+
+    function applyLang(lang) {
+      L = I18N[lang] || I18N.vi;
+      document.documentElement.lang = lang;
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const k = el.dataset.i18n; if (!L[k]) return;
+        if (el.tagName === "LABEL" && el.firstChild) el.firstChild.nodeValue = L[k] + " ";
+        else el.textContent = L[k];
+      });
+    }
+
+    async function scan() {
+      const list = document.getElementById("list");
+      list.innerHTML = `<div class="wifi-scanning">${L.scanning}</div>`;
+      let nets;
+      try { nets = await (await fetch("/api/scan")).json(); }
+      catch (e) { list.innerHTML = `<div class="wifi-scanning">${L.scanErr}</div>`; return; }
+      nets = (nets || []).filter(n => n.ssid);
+      if (!nets.length) { list.innerHTML = `<div class="wifi-scanning">${L.noNet}</div>`; return; }
+      nets.sort((a, b) => b.rssi - a.rssi);
+      const seen = {}; list.innerHTML = "";
+      nets.forEach(n => {
+        if (seen[n.ssid]) return; seen[n.ssid] = 1;
+        const bars = n.rssi > -55 ? 4 : n.rssi > -65 ? 3 : n.rssi > -75 ? 2 : 1;
+        const it = document.createElement("div"); it.className = "wifi-item";
+        const l = document.createElement("span"); l.className = "ws-ssid"; l.textContent = (n.enc ? "🔒 " : "") + n.ssid;
+        const r = document.createElement("span"); r.className = "ws-meta"; r.textContent = "▂▄▆█".slice(0, bars) + " " + n.rssi + "dBm";
+        it.append(l, r); it.onclick = () => pick(n.ssid); list.appendChild(it);
+      });
+    }
+    function pick(ssid) {
+      picked = ssid;
+      document.getElementById("ssidShow").value = ssid;
+      document.getElementById("list").style.display = "none";
+      document.getElementById("scanBtn").style.display = "none";
+      document.getElementById("passBox").style.display = "block";
+      document.getElementById("pass").focus();
+    }
+    function back() {
+      document.getElementById("passBox").style.display = "none";
+      document.getElementById("list").style.display = "block";
+      document.getElementById("scanBtn").style.display = "block";
+    }
+    async function save() {
+      if (!picked) return;
+      const btn = document.getElementById("saveBtn");
+      btn.disabled = true; btn.textContent = L.saving;
+      try {
+        await fetch("/api/wifi", { method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ssid: picked, pass: document.getElementById("pass").value }) });
+      } catch (e) {}
+      document.getElementById("passBox").style.display = "none";
+      document.getElementById("done").style.display = "block";
+    }
+
+    fetch("/api/lang").then(r => r.json()).then(d => applyLang(d.lang === "en" ? "en" : "vi")).catch(() => {});
+    scan();
+  </script>
+</body>
+</html>

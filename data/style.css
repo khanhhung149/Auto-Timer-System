@@ -1,0 +1,145 @@
+/* ===== Bang mau theo Bootstrap 5 (giong du an cu) ===== */
+:root{
+  --bg:#eef1f5; --card:#ffffff; --card2:#f8f9fa;
+  --txt:#212529; --muted:#6c757d; --line:#dee2e6;
+  --pri:#0d6efd; --pri-d:#0b5ed7;
+  --on:#198754; --off:#adb5bd; --danger:#dc3545; --danger-d:#bb2d3b;
+  --navbar:#212529;
+  --radius:.5rem;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; color:var(--txt); background:var(--bg);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  padding-bottom:90px; font-size:15px;
+}
+
+/* ===== Topbar (navbar toi) ===== */
+.topbar{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 18px; background:var(--navbar); color:#fff;
+  position:sticky; top:0; z-index:10; box-shadow:0 2px 6px rgba(0,0,0,.15);
+}
+.brand{display:flex; align-items:center; gap:12px}
+.logo{font-size:30px}
+.logo-img{height:38px; width:auto; object-fit:contain}
+.brand h1{margin:0; font-size:19px; color:#fff}
+.brand small{color:#adb5bd}
+.right{display:flex; align-items:center; gap:14px}
+.lang{display:flex; border:1px solid #495057; border-radius:6px; overflow:hidden}
+.lang button{padding:6px 10px; border:none; background:transparent; color:#adb5bd; cursor:pointer; font-size:12px; font-weight:700}
+.lang button.active{background:var(--pri); color:#fff}
+.clock{text-align:right}
+#clkTime{font-size:24px; font-weight:700; font-variant-numeric:tabular-nums; color:#fff}
+.muted{color:var(--muted); font-size:13px}
+
+/* ===== Tabs (nav-pills) ===== */
+.tabs{display:flex; gap:6px; padding:12px 18px 0; overflow-x:auto; flex-wrap:wrap}
+.tab{
+  flex:1; min-width:90px; padding:9px 12px; border:1px solid var(--line); cursor:pointer;
+  background:#fff; color:var(--muted); border-radius:8px;
+  font-size:14px; font-weight:600;
+}
+.tab.active{background:var(--pri); color:#fff; border-color:var(--pri)}
+
+/* ===== Page / Card ===== */
+main{padding:14px 18px; max-width:900px; margin:0 auto}
+.page{display:none} .page.active{display:block}
+.card{
+  background:var(--card); border:1px solid var(--line);
+  border-radius:var(--radius); padding:16px; margin-bottom:14px;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);
+}
+.card h2{margin:0 0 14px; font-size:17px; color:var(--txt)}
+label{display:block; margin-bottom:12px; font-size:14px; color:var(--muted); font-weight:500}
+input[type=text],input[type=password],input[type=number],input[type=time],select{
+  width:100%; margin-top:6px; padding:9px 11px; border-radius:7px;
+  border:1px solid #ced4da; background:#fff; color:var(--txt); font-size:15px;
+}
+input:focus,select:focus{outline:none; border-color:#86b7fe; box-shadow:0 0 0 3px rgba(13,110,253,.2)}
+
+/* ===== Buttons ===== */
+.btn{
+  padding:9px 16px; border:1px solid var(--line); border-radius:7px;
+  background:#fff; color:var(--txt); cursor:pointer; font-size:14px; font-weight:600;
+  margin-right:8px; margin-top:4px;
+}
+.btn:hover{background:#f1f3f5}
+.btn.primary{background:var(--pri); border-color:var(--pri); color:#fff}
+.btn.primary:hover{background:var(--pri-d)}
+.btn.danger{background:var(--danger); border-color:var(--danger); color:#fff}
+.btn.danger:hover{background:var(--danger-d)}
+.fab{
+  position:fixed; bottom:18px; right:18px; padding:13px 20px;
+  background:var(--pri); color:#fff; border:none; border-radius:30px;
+  font-size:15px; font-weight:700; cursor:pointer; box-shadow:0 6px 18px rgba(13,110,253,.4);
+}
+.fab:hover{background:var(--pri-d)}
+
+/* ===== Relay card ===== */
+.relay-head{display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap}
+.dot{width:14px; height:14px; border-radius:50%; background:var(--off); flex:none}
+.relay.on .dot{background:var(--on); box-shadow:0 0 8px rgba(25,135,84,.6)}
+.relay-name{flex:1; min-width:120px; font-weight:700; font-size:16px;
+  background:transparent!important; border:none!important; border-bottom:1px dashed var(--line)!important; border-radius:0!important; color:var(--txt)}
+
+.seg{display:flex; border:1px solid var(--line); border-radius:7px; overflow:hidden}
+.seg button{padding:8px 12px; border:none; background:#fff; color:var(--muted); cursor:pointer; font-size:13px; font-weight:600}
+.seg button.active{background:var(--pri); color:#fff}
+.seg.small button{padding:6px 10px; font-size:12px}
+
+.relay-sub{display:flex; align-items:center; gap:10px; margin:-2px 0 8px}
+.sub-label{color:var(--muted); font-size:13px}
+
+/* ===== Schedule ===== */
+.sched{background:var(--card2); border:1px solid var(--line); border-radius:9px; padding:12px; margin-top:10px}
+.sched-top{display:flex; align-items:center; gap:10px; margin-bottom:10px}
+.sc-name{flex:1; background:#fff; border:1px solid #ced4da; border-radius:7px; padding:8px; color:var(--txt)}
+.time-row{display:flex; align-items:flex-end; gap:12px; margin-bottom:12px}
+.time-box{flex:1}
+.time-box small{color:var(--muted); font-size:12px}
+.arrow{color:var(--muted); padding-bottom:8px}
+.hm{display:flex; align-items:center; gap:6px; margin-top:6px}
+.hm input{width:64px; text-align:center; font-size:18px; font-variant-numeric:tabular-nums}
+.hm span{color:var(--muted); font-weight:700}
+
+.days{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px}
+.chip{
+  width:38px; height:38px; border-radius:50%; border:1px solid #ced4da;
+  background:#fff; color:var(--muted); cursor:pointer; font-size:13px; font-weight:600;
+}
+.chip.on{background:var(--pri); color:#fff; border-color:var(--pri)}
+
+.presets{display:flex; gap:6px; flex-wrap:wrap}
+.presets button{
+  flex:1; min-width:72px; padding:7px; border:1px solid var(--line); border-radius:7px;
+  background:#fff; color:var(--muted); cursor:pointer; font-size:12px; font-weight:600;
+}
+.presets button:hover{border-color:var(--pri); color:var(--pri)}
+
+/* Toggle switch */
+.switch{position:relative; display:inline-block; width:46px; height:26px; flex:none}
+.switch input{display:none}
+.slider{position:absolute; inset:0; background:var(--off); border-radius:26px; transition:.2s; cursor:pointer}
+.slider:before{content:""; position:absolute; width:20px; height:20px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; box-shadow:0 1px 2px rgba(0,0,0,.3)}
+.switch input:checked + .slider{background:var(--on)}
+.switch input:checked + .slider:before{transform:translateX(20px)}
+
+/* Dong checkbox */
+.row-check{display:flex; align-items:center; gap:10px; cursor:pointer; margin-bottom:14px}
+.row-check input{width:18px; height:18px}
+
+/* Danh sach WiFi quet duoc */
+.wifi-list{margin:10px 0; border:1px solid var(--line); border-radius:8px; overflow:hidden; max-height:260px; overflow-y:auto}
+.wifi-list:empty{display:none}
+.wifi-item{display:flex; justify-content:space-between; align-items:center; padding:11px 14px; border-bottom:1px solid var(--line); cursor:pointer}
+.wifi-item:last-child{border-bottom:none}
+.wifi-item:hover{background:var(--card2)}
+.ws-ssid{font-weight:600}
+.ws-meta{color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums}
+.wifi-scanning{padding:14px; text-align:center; color:var(--muted)}
+
+/* key-value rows */
+.kv{display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--line)}
+.kv:last-child{border-bottom:none}
+.kv span{color:var(--muted)}

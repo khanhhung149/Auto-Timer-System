@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auto Timer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img class="logo-img" src="logo.png" alt="EETIUM" />
+      <div>
+        <h1>Auto Timer</h1>
+        <small data-i18n="sub">Đăng nhập</small>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="card" style="max-width:420px;margin:30px auto">
+      <h2 data-i18n="title">Đăng nhập</h2>
+      <div id="err" style="display:none;background:#f8d7da;color:#842029;padding:10px;border-radius:8px;margin-bottom:12px;font-size:14px"
+           data-i18n="err">Sai tài khoản hoặc mật khẩu</div>
+      <form method="POST" action="/login">
+        <label data-i18n="user">Tài khoản
+          <input type="text" name="USERNAME" autocomplete="username" required />
+        </label>
+        <label data-i18n="pass">Mật khẩu
+          <input type="password" name="PASSWORD" autocomplete="current-password" required />
+        </label>
+        <button class="btn primary" type="submit" style="width:100%" data-i18n="btn">Đăng nhập</button>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const I18N = {
+      vi: { sub: "Đăng nhập", title: "Đăng nhập", err: "Sai tài khoản hoặc mật khẩu",
+            user: "Tài khoản", pass: "Mật khẩu", btn: "Đăng nhập" },
+      en: { sub: "Sign in", title: "Sign in", err: "Wrong username or password",
+            user: "Username", pass: "Password", btn: "Sign in" }
+    };
+    function applyLang(lang) {
+      const t = I18N[lang] || I18N.vi;
+      document.documentElement.lang = lang;
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const k = el.dataset.i18n;
+        if (!t[k]) return;
+        if (el.tagName === "LABEL" && el.firstChild) el.firstChild.nodeValue = t[k] + " ";
+        else el.textContent = t[k];
+      });
+    }
+    if (location.search.indexOf("e=1") >= 0)
+      document.getElementById("err").style.display = "block";
+    fetch("/api/lang").then(r => r.json()).then(d => applyLang(d.lang === "en" ? "en" : "vi")).catch(() => {});
+  </script>
+</body>
+</html>

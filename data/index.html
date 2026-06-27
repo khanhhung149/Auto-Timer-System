@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auto Timer System</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ===== Thanh tieu de + dong ho ===== -->
+  <header class="topbar">
+    <div class="brand">
+      <img class="logo-img" src="logo.png" alt="EETIUM" />
+      <div>
+        <h1>Auto Timer</h1>
+        <small id="devStatus" data-i18n="connecting">Dang ket noi...</small>
+      </div>
+    </div>
+    <div class="right">
+      <div class="lang">
+        <button id="langVi" class="active" onclick="setLang('vi')">VN</button>
+        <button id="langEn" onclick="setLang('en')">EN</button>
+      </div>
+      <div class="clock">
+        <div id="clkTime">--:--:--</div>
+        <div id="clkDate" class="muted">-- --/--/----</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Tab dieu huong ===== -->
+  <nav class="tabs">
+    <button class="tab active" data-tab="relays" data-i18n="tab_relays">Relay</button>
+    <button class="tab" data-tab="wifi" data-i18n="tab_wifi">WiFi</button>
+    <button class="tab" data-tab="settings" data-i18n="tab_settings">Cai dat</button>
+    <button class="tab" data-tab="system" data-i18n="tab_system">He thong</button>
+  </nav>
+
+  <main>
+    <!-- ===== Trang Relay ===== -->
+    <section id="relays" class="page active">
+      <div id="relayList" class="relay-list"><!-- JS render --></div>
+    </section>
+
+    <!-- ===== Trang WiFi ===== -->
+    <section id="wifi" class="page">
+      <div class="card">
+        <h2 data-i18n="wifi_title">Ket noi WiFi</h2>
+        <button class="btn" data-i18n="wifi_scan" onclick="scanWifi()">Quet WiFi</button>
+        <div id="wifiList" class="wifi-list"></div>
+        <label data-i18n="wifi_ssid">Ten WiFi (SSID)
+          <input type="text" id="wifiSsid" />
+        </label>
+        <label data-i18n="wifi_pass">Mat khau
+          <input type="password" id="wifiPass" />
+        </label>
+        <button class="btn primary" data-i18n="wifi_save" onclick="saveWifi()">Luu &amp; ket noi</button>
+      </div>
+    </section>
+
+    <!-- ===== Trang Cai dat (Thoi gian + IP) ===== -->
+    <section id="settings" class="page">
+      <div class="card">
+        <h2 data-i18n="time_title">Dong bo thoi gian</h2>
+        <label data-i18n="time_ntp">May chu NTP
+          <input type="text" id="ntpServer" value="pool.ntp.org" />
+        </label>
+        <label data-i18n="time_gmt">Mui gio
+          <select id="gmtOffset"></select>
+        </label>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="ip_title">Cau hinh IP</h2>
+        <label data-i18n="ip_mode">Che do IP
+          <select id="ipMode" onchange="toggleDhcp()">
+            <option value="1" data-i18n="ip_auto">Tu dong (DHCP)</option>
+            <option value="0" data-i18n="ip_manual">Thu cong (Static)</option>
+          </select>
+        </label>
+        <div id="staticFields">
+          <label data-i18n="ip_addr">Dia chi IP
+            <input type="text" id="ipAddr" placeholder="192.168.1.50" />
+          </label>
+          <label data-i18n="ip_gw">Gateway
+            <input type="text" id="ipGw" placeholder="192.168.1.1" />
+          </label>
+          <label data-i18n="ip_sn">Subnet mask
+            <input type="text" id="ipSn" placeholder="255.255.255.0" />
+          </label>
+          <label data-i18n="ip_dns">DNS
+            <input type="text" id="ipDns" placeholder="8.8.8.8" />
+          </label>
+        </div>
+        <label data-i18n="ip_mdns">Ten mDNS
+          <input type="text" id="ipMdns" placeholder="autotimer" />
+        </label>
+        <p class="muted" data-i18n="ip_note">Doi IP xong thiet bi can khoi dong lai.</p>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="weather_title">Thoi tiet</h2>
+        <label data-i18n="weather_city">Thanh pho (bo trong = tu do qua IP)
+          <input type="text" id="city" placeholder="Hanoi" />
+        </label>
+        <p class="muted" data-i18n="weather_note">Hien ten thanh pho + nhiet do o footer man hinh OLED.</p>
+      </div>
+
+      <button class="btn primary" data-i18n="save" onclick="saveSettings()" style="width:100%">Luu</button>
+    </section>
+
+    <!-- ===== Trang He thong ===== -->
+    <section id="system" class="page">
+      <div class="card">
+        <h2 data-i18n="sys_title">Thong tin</h2>
+        <div class="kv"><span data-i18n="sys_ip">IP</span><b id="sysIp">-</b></div>
+        <div class="kv"><span data-i18n="sys_wifi">WiFi</span><b id="sysWifi">-</b></div>
+        <div class="kv"><span data-i18n="sys_rtc">RTC (DS1307)</span><b id="sysRtc">-</b></div>
+        <div class="kv"><span data-i18n="sys_uptime">Uptime</span><b id="sysUptime">-</b></div>
+        <p class="muted" data-i18n="sys_reset_hint">Khoi phuc mac dinh / xoa WiFi: dung nut vat ly (giu 5s = xoa WiFi, 30s = reset all).</p>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="pw_title">Doi mat khau</h2>
+        <label data-i18n="pw_old">Mat khau hien tai
+          <input type="password" id="pwOld" autocomplete="current-password" />
+        </label>
+        <label data-i18n="pw_new">Mat khau moi
+          <input type="password" id="pwNew" autocomplete="new-password" />
+        </label>
+        <button class="btn primary" data-i18n="pw_save" onclick="savePassword()">Doi mat khau</button>
+      </div>
+
+      <div class="card">
+        <button class="btn" data-i18n="logout" onclick="location.href='/logout'">Dang xuat</button>
+      </div>
+    </section>
+  </main>
+
+  <button id="saveAllBtn" class="fab" data-i18n="save_all" onclick="saveAll()">💾 Luu cau hinh</button>
+
+  <!-- Khuon mau the relay -->
+  <template id="relayTpl">
+    <div class="card relay">
+      <div class="relay-head">
+        <span class="dot"></span>
+        <input class="relay-name" type="text" />
+        <div class="seg">
+          <button data-mode="0" data-i18n="mode_auto">Tu dong</button>
+          <button data-mode="1" data-i18n="mode_on">Bat</button>
+          <button data-mode="2" data-i18n="mode_off">Tat</button>
+        </div>
+      </div>
+      <div class="sched-list"><!-- JS render lich --></div>
+    </div>
+  </template>
+
+  <!-- Khuon mau 1 lich -->
+  <template id="schedTpl">
+    <div class="sched">
+      <div class="sched-top">
+        <label class="switch">
+          <input type="checkbox" class="sc-en" />
+          <span class="slider"></span>
+        </label>
+        <input class="sc-name" type="text" />
+      </div>
+      <div class="time-row">
+        <div class="time-box">
+          <small class="lbl-on">Bat</small>
+          <div class="hm">
+            <input class="sc-sh" type="number" min="0" max="23" inputmode="numeric" />
+            <span>:</span>
+            <input class="sc-sm" type="number" min="0" max="59" inputmode="numeric" />
+          </div>
+        </div>
+        <span class="arrow">→</span>
+        <div class="time-box">
+          <small class="lbl-off">Tat</small>
+          <div class="hm">
+            <input class="sc-eh" type="number" min="0" max="23" inputmode="numeric" />
+            <span>:</span>
+            <input class="sc-em" type="number" min="0" max="59" inputmode="numeric" />
+          </div>
+        </div>
+      </div>
+      <div class="days"><!-- chip thu, JS render --></div>
+      <div class="presets">
+        <button data-preset="127" data-i18n="p_everyday">Hang ngay</button>
+        <button data-preset="62"  data-i18n="p_weekdays">Ngay thuong</button>
+        <button data-preset="65"  data-i18n="p_weekends">Cuoi tuan</button>
+        <button data-preset="0"   data-i18n="p_once">Mot lan</button>
+      </div>
+    </div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
