@@ -31,6 +31,7 @@ const I18N = {
     p_everyday: "Hằng ngày", p_weekdays: "Ngày thường", p_weekends: "Cuối tuần", p_once: "Một lần",
     lbl_on: "Bật", lbl_off: "Tắt", sched_name: "Tên lịch",
     saved: "Đã lưu cấu hình", saved_demo: "DEMO: đã lưu (giả lập)",
+    rebooting: "Đổi cấu hình mạng — thiết bị đang khởi động lại...",
     saved_wifi: "Đã lưu WiFi, thiết bị sẽ kết nối lại", syncing: "Đang đồng bộ...",
     err_save: "Lỗi lưu!", confirm_reset: "Khôi phục mặc định? Mất hết cấu hình.",
     st_connected: "Đã kết nối", st_ap: "AP / chưa nối", st_ok: "OK", st_err: "Lỗi",
@@ -62,6 +63,7 @@ const I18N = {
     p_everyday: "Every day", p_weekdays: "Weekdays", p_weekends: "Weekends", p_once: "Once",
     lbl_on: "On", lbl_off: "Off", sched_name: "Schedule name",
     saved: "Config saved", saved_demo: "DEMO: saved (mock)",
+    rebooting: "Network changed — device is restarting...",
     saved_wifi: "WiFi saved, device will reconnect", syncing: "Syncing...",
     err_save: "Save error!", confirm_reset: "Factory reset? All config will be lost.",
     st_connected: "Connected", st_ap: "AP / not connected", st_ok: "OK", st_err: "Error",
@@ -369,9 +371,14 @@ async function refreshStatus() {
 async function saveAll(silent) {
   if (DEMO) return silent ? null : toast(T("saved_demo"));
   try {
-    await api("/api/config", { method: "POST",
+    const r = await api("/api/config", { method: "POST",
       headers: { "Content-Type": "application/json" }, body: JSON.stringify(CONFIG) });
-    if (!silent) toast(T("saved"));
+    if (r && r.reboot) {                      // doi cau hinh mang -> thiet bi reboot
+      toast(T("rebooting"));
+      const newHost = (CONFIG.dhcp === false && CONFIG.ip) ? CONFIG.ip
+                    : (CONFIG.mdns ? CONFIG.mdns + ".local" : location.hostname);
+      setTimeout(() => { location.href = "http://" + newHost + "/"; }, 7000);
+    } else if (!silent) toast(T("saved"));
   } catch (e) { toast(T("err_save")); }
 }
 async function setRelayMode(ri, mode) {

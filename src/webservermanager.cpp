@@ -167,10 +167,28 @@ static void handlePostConfig() {
     server.send(400, "application/json", "{\"ok\":false,\"err\":\"json\"}");
     return;
   }
+  // Luu gia tri MANG cu de phat hien thay doi (IP tinh/mDNS chi ap khi reboot)
+  bool oldDhcp = g_cfg->dhcp;
+  char oldIp[16], oldGw[16], oldSn[16], oldDns[16], oldMdns[24];
+  strlcpy(oldIp,   g_cfg->ip,      sizeof(oldIp));
+  strlcpy(oldGw,   g_cfg->gateway, sizeof(oldGw));
+  strlcpy(oldSn,   g_cfg->subnet,  sizeof(oldSn));
+  strlcpy(oldDns,  g_cfg->dns,     sizeof(oldDns));
+  strlcpy(oldMdns, g_cfg->mdns,    sizeof(oldMdns));
+
   Storage::fromJson(*g_cfg, doc);
   Storage::save(*g_cfg);
   applyConfig();
-  server.send(200, "application/json", "{\"ok\":true}");
+
+  bool netChanged = (oldDhcp != g_cfg->dhcp)
+                 || strcmp(oldIp,   g_cfg->ip)      != 0
+                 || strcmp(oldGw,   g_cfg->gateway) != 0
+                 || strcmp(oldSn,   g_cfg->subnet)  != 0
+                 || strcmp(oldDns,  g_cfg->dns)     != 0
+                 || strcmp(oldMdns, g_cfg->mdns)    != 0;
+
+  server.send(200, "application/json", netChanged ? "{\"ok\":true,\"reboot\":true}" : "{\"ok\":true}");
+  if (netChanged) { delay(700); ESP.restart(); }   // reboot de ap IP/mDNS moi
 }
 
 // ---------- POST /api/relay : doi che do 1 relay {ch,mode} ----------

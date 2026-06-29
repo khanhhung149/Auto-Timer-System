@@ -105,10 +105,6 @@ bool   WeatherManager::hasData() { return temp_.length() > 0; }
 String WeatherManager::city()    { return city_; }
 
 String WeatherManager::footer() {
-  String t = temp_; t.replace("°", "");           // bo ky tu do
-  String f = city_ + " " + t;                      // "Hanoi +28C"
-  String out;                                      // bo ky tu non-ascii (dau TV)
-  for (uint16_t i = 0; i < f.length(); i++)
-    if ((uint8_t)f[i] < 128) out += f[i];
-  return out;
+  String t = temp_; t.replace("°", "");           // bo ky tu do (font khong co glyph nay)
+  return city_ + " " + t;                          // giu DAU (vd "Hà Nội +26C") - font Viet render duoc
 }

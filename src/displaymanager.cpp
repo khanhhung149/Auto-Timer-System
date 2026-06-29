@@ -12,10 +12,14 @@ static const char* THU_VI[] = {"CN","T2","T3","T4","T5","T6","T7"};
 static const char* THU_EN[] = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
 static bool useEN = false;   // mac dinh tieng Viet
 
+
+
 // Font ho tro tieng Viet co dau (giong he cu) - 16px
-#define DISPLAY_VN_FONT u8g2_font_unifont_t_vietnamese1
+#define DISPLAY_VN_FONT u8g2_font_unifont_t_vietnamese2
 // TR-style: chon chuoi theo ngon ngu
 static inline const char* TR(const char* vi, const char* en){ return useEN ? en : vi; }
+
+
 // Ve chuoi UTF-8 (co dau) bang font Viet, can giua
 static void vnCenter(const char* s, int y){
   u8g2.setFont(DISPLAY_VN_FONT);
@@ -89,7 +93,7 @@ void DisplayManager::showMain(const DateTime& now, bool wifiOn, const char* weat
                               bool hasNext, uint8_t evRelay, bool evOn,
                               uint8_t evHour, uint8_t evMin){
     const char* dow = (useEN ? THU_EN : THU_VI)[now.dayOfTheWeek()];
-    char buf[32];
+    char buf[64];
 
     u8g2.clearBuffer();
 
@@ -108,9 +112,9 @@ void DisplayManager::showMain(const DateTime& now, bool wifiOn, const char* weat
     int w = u8g2.getStrWidth(buf);
     u8g2.drawStr((128 - w) / 2, 44, buf);
 
-    // Footer (kieu he cu): uu tien thoi tiet, neu khong co thi su kien ke tiep
+    // Footer (font Viet, co dau): uu tien thoi tiet, khong co thi su kien ke tiep
     if (weather && weather[0]) {
-        snprintf(buf, sizeof(buf), "%s", weather);          // vd "Hanoi +28C"
+        snprintf(buf, sizeof(buf), "%s", weather);          // vd "Hà Nội +26C"
     } else if (hasNext) {
         const char* act = evOn ? TR("Bật", "ON") : TR("Tắt", "OFF");
         snprintf(buf, sizeof(buf), "-> %02d:%02d R%d %s", evHour, evMin, evRelay + 1, act);
@@ -213,3 +217,4 @@ void DisplayManager::showRelaySchedule(uint8_t idx, const RelayConfig& rc){
     }
     u8g2.sendBuffer();
 }
+
